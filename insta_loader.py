@@ -9,7 +9,7 @@ class Instagram:
 
     def __init__(self):
         self.target = ""
-        self.user = "89fede_"
+        self.user = ""
         self.profilo = ""
 
 
@@ -82,7 +82,7 @@ Privato: {self.profilo.is_private}
 
     def start(self):
         try:
-            # self.user = input("Inserisci il tuo Username: ")
+            self.user = input("Inserisci il tuo Username: ")
             self.target = input("inserisci l'Username Target: ")
             self.profilo = self.get_user_profile(self.target)
             scelta = input("""\n
