@@ -1,11 +1,17 @@
+from instaloader.exceptions import ConnectionException, ProfileNotExistsException, QueryReturnedNotFoundException
 from instaloader.instaloader import Instaloader
 from instaloader.structures import Profile
+from rich.console import Console
+import os, sys
 
 
 L = Instaloader(download_video_thumbnails=False, download_geotags=False, download_comments=False, save_metadata=False, compress_json=False)
+console = Console()
 
 
 class Instagram:
+
+    OPENING = 0
 
     def __init__(self):
         self.target = ""
@@ -16,20 +22,21 @@ class Instagram:
     def get_posts(self):
         """ ottengo tutti i post di un profilo, dato username - LOGIN REQUIRED """
         posts = self.profilo.get_posts()
-        L.interactive_login(self.user)
         for post in posts:  
             try:            
                 L.download_post(post=post, target=self.target)
             except KeyboardInterrupt:
-                print("\nexiting...")
+                console.print("\nexiting...", style="italic red")
+                input()
                 break
             except:
-                print("Errore nel Download dei Posts!")
+                console.print("Errore nel Download dei Posts!", style="italic red")
+                input()
 
 
     @staticmethod
     def get_user_profile(target):
-        """ ottengo Profilo, dato username """
+        """ ottengo un istanza di Profilo, dato username """
         return Profile.from_username(L.context, target)
 
 
@@ -37,24 +44,29 @@ class Instagram:
         """ DOWNLOAD STORIES -> LOGIN REQUIRED """
         if self.profilo.has_public_story:
             try:
-                L.interactive_login(self.user)
                 L.download_stories(userids=[self.profilo], filename_target=f"{self.target}") 
             except KeyboardInterrupt:
-                print("\nexiting...")
+                console.print("\nexiting...", style="italic red")
+                input()
+                sys.exit()
         else:
-            print(f"{self.profilo} non ha storie pubbliche al momento!")
+            console.print(f"{self.profilo} non ha storie pubbliche al momento!", style="italic #d75f00")
+            input()
 
 
     def download_igtv(self):
         """ Scarico IGTV """
         if self.profilo.igtvcount != 0:
             try:
-                print("Sto scaricando...")
+                console.print("Sto scaricando...", style="italic blue")
                 L.download_igtv(profile=self.profilo)
             except KeyboardInterrupt:
-                print("\nexiting...")
+                console.print("\nexiting...", style="italic red")
+                input()
+                sys.exit()
         else:
-            print("Non ci sono IGTV video da scaricare...")    
+            console.print("Non ci sono IGTV video da scaricare...", style="italic #d75f00")
+            input()
 
 
     def get_profile_picture(self):
@@ -64,52 +76,110 @@ class Instagram:
 
     def get_profile_info(self):
         try:
-            print(f"""
-    {self.profilo.username}:
+            console.print(f"""
+    [italic #d75f00]{self.profilo.username}[/italic #d75f00]:
     
-Nome: {self.profilo.full_name}
-ID: {self.profilo.userid}
-Followers: {self.profilo.followers}
-Seguiti: {self.profilo.followees}
-Bio: {self.profilo.biography}
-Verificato: {self.profilo.is_verified}
-Storie Pubbliche: {self.profilo.has_public_story}
-Privato: {self.profilo.is_private}
-            """)            
+[bold blue]Nome:[/bold blue] {self.profilo.full_name}
+[bold blue]ID:[/bold blue] {self.profilo.userid}
+[bold blue]Followers:[/bold blue] {self.profilo.followers}
+[bold blue]Seguiti:[/bold blue] {self.profilo.followees}
+[bold blue]Bio:[/bold blue] \n{self.profilo.biography}
+[bold blue]Verificato:[/bold blue] {self.profilo.is_verified}
+[bold blue]Storie Pubbliche:[/bold blue] {self.profilo.has_public_story}
+[bold blue]Privato:[/bold blue] {self.profilo.is_private}
+            """, justify="center")
+            input()     
         except:
-            print("Errore...")
+            console.print("Errore...", style="italic red")
+            input()
+
+    
+    def get_similar_profile(self):
+        """ LOGIN REQUIRED """
+        
+        account_simili = self.profilo.get_similar_accounts()
+        print("Account Simili: ")
+        for account in account_simili:
+            print(account.username)
+        input()
+
+
+    def target_data(self):
+            self.target = input("Inserisci l'Username Target: ")
+            try:
+                self.profilo = self.get_user_profile(self.target)
+            except QueryReturnedNotFoundException as e:
+                console.print(f"Errore! Utente non trovato...{e}", style="italic red")
+                input()
+            except ConnectionException as e:
+                console.print(f"Errore! Connessione non riuscita...{e}", style="italic red")
+                input()
+            except ProfileNotExistsException as e:
+                console.print(f"Errore! Il Profilo '{self.target}' non esiste ...{e}", style="italic red")
+                input()
+            except:
+                console.print("Errore nell'inserimento dati!", style="italic red")
+                input()
+            else:
+                console.print(f"Target Acquisito: {self.target}")
+                input()
+                self.start()
 
 
     def start(self):
         try:
-            self.user = input("Inserisci il tuo Username: ")
-            self.target = input("inserisci l'Username Target: ")
-            self.profilo = self.get_user_profile(self.target)
-            scelta = input("""\n
-SELEZIONA AZIONE DA ESEGUIRE:
-1- SCARICA TUTTI I POST DI UN 'TARGET' (COMPRESI IGTV E VIDEO)
-2- SCARICA LE STORIE ATTUALI DI UN 'TARGET'
-3- SCARICA IGTV DI 'TARGET'
-4- SCARICA FOTO PROFILO DI 'TARGET'
-5- INFORMAZIONI SUL PROFILO
-    """)
+            if Instagram.OPENING == 0:
+                Instagram.OPENING = 1
+                self.user = input("Inserisci il tuo Username: ")
+                L.interactive_login(self.user)
+                self.target_data()
+            os.system("cls")
+            console.print(f"""\n
+                SELEZIONA AZIONE DA ESEGUIRE: :smiley:
+
+                [green]0[/green]- CAMBIA TARGET
+                [green]1[/green]- INFORMAZIONI SUL PROFILO
+                [green]2[/green]- LISTA PROFILI 'SIMILI'
+                [green]3[/green]- SCARICA FOTO PROFILO DI '[green]{self.target}[/green]'
+                [green]4[/green]- SCARICA LE STORIE ATTUALI DI UN '[green]{self.target}[/green]'
+                [green]5[/green]- SCARICA IGTV DI '[green]{self.target}[/green]'
+                [green]6[/green]- SCARICA TUTTI I POST DI UN '[green]{self.target}[/green]' (COMPRESI IGTV E VIDEO)
+                    """,
+                    style="bold white on dark_blue", 
+                    justify="center")
+            scelta = input()
+        except KeyboardInterrupt:
+            console.print("\nexiting...", style="italic red")
+            input()
+            sys.exit()
         except:
-            print("Errore nell'inserimento dati!")
+            console.print("Errore nell'inserimento dati!", style="italic red")
+            input()
         else:
+            if scelta == "0":
+                self.target_data() 
             if scelta == "1":
-                self.get_posts()
+                self.get_profile_info() 
             elif scelta == "2":
-                self.download_stories()
+                self.get_similar_profile()
             elif scelta == "3":
-                self.download_igtv()
-            elif scelta == "4":
                 self.get_profile_picture()
+            elif scelta == "4":
+                self.download_stories()
             elif scelta == "5":
-                self.get_profile_info()
+                self.download_igtv()
+            elif scelta == "6":
+                self.get_posts()
             else:
                 print("Scelta non valida!")
+                input()
 
 
 if __name__ == "__main__":
     insta = Instagram()
-    insta.start()
+    while True:
+        try:
+            insta.start()
+        except KeyboardInterrupt:
+            console.print("\nexiting...", style="italic red")
+            break
