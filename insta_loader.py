@@ -71,7 +71,13 @@ class Instagram:
 
     def get_profile_picture(self):
         """ Scarico Foto Profilo """
-        L.download_profilepic(profile=self.profilo)
+        try:
+            L.download_profilepic(profile=self.profilo)
+        except:
+            console.print("Errore nel Download della Foto Profilo!", style="italic red")
+        else:
+            console.print("Foto Profilo Scaricata!", style="bold blue")
+
 
 
     def get_profile_info(self):
@@ -95,8 +101,7 @@ class Instagram:
 
     
     def get_similar_profile(self):
-        """ LOGIN REQUIRED """
-        
+        """ LOGIN REQUIRED """     
         account_simili = self.profilo.get_similar_accounts()
         print("Account Simili: ")
         for account in account_simili:
@@ -121,7 +126,7 @@ class Instagram:
                 console.print("Errore nell'inserimento dati!", style="italic red")
                 input()
             else:
-                console.print(f"Target Acquisito: {self.target}")
+                console.print(f"Target Acquisito: [bold blue]{self.target}[/bold blue]")
                 input()
                 self.start()
 
