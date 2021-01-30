@@ -29,6 +29,10 @@ class Instagram:
                 console.print("\nexiting...", style="italic red")
                 input()
                 break
+            except ConnectionException as e:
+                console.print(f"Errore! Connessione non riuscita...{e}", style="italic red")
+                input()
+                sys.exit()
             except:
                 console.print("Errore nel Download dei Posts!", style="italic red")
                 input()
@@ -49,6 +53,10 @@ class Instagram:
                 console.print("\nexiting...", style="italic red")
                 input()
                 sys.exit()
+            except ConnectionException as e:
+                console.print(f"Errore! Connessione non riuscita...{e}", style="italic red")
+                input()
+                sys.exit()
         else:
             console.print(f"{self.profilo} non ha storie pubbliche al momento!", style="italic #d75f00")
             input()
@@ -64,6 +72,10 @@ class Instagram:
                 console.print("\nexiting...", style="italic red")
                 input()
                 sys.exit()
+            except ConnectionException as e:
+                console.print(f"Errore! Connessione non riuscita...{e}", style="italic red")
+                input()
+                sys.exit()
         else:
             console.print("Non ci sono IGTV video da scaricare...", style="italic #d75f00")
             input()
@@ -71,7 +83,14 @@ class Instagram:
 
     def get_profile_picture(self):
         """ Scarico Foto Profilo """
-        L.download_profilepic(profile=self.profilo)
+        try:
+            L.download_profilepic(profile=self.profilo)
+        except ConnectionException as e:
+                console.print(f"Errore! Connessione non riuscita...{e}", style="italic red")
+                input()
+                sys.exit()
+        else:
+            console.print(f"Foto profilo di {self.target} scaricata!")
 
 
     def get_profile_info(self):
@@ -95,12 +114,17 @@ class Instagram:
 
     
     def get_similar_profile(self):
-        """ LOGIN REQUIRED """     
-        account_simili = self.profilo.get_similar_accounts()
-        print("Account Simili: ")
-        for account in account_simili:
-            print(account.username)
-        input()
+        """ LOGIN REQUIRED """
+        try:
+            account_simili = self.profilo.get_similar_accounts()
+            print("Sto cercando account simili...")
+            for account in account_simili:
+                print(account.username)
+            input()
+        except ConnectionException as e:
+                console.print(f"Errore! Connessione non riuscita...{e}", style="italic red")
+                input()
+                sys.exit()
 
 
     def target_data(self):
@@ -130,7 +154,7 @@ class Instagram:
 
     @staticmethod
     def get_saved_posts():
-        num = input("Inserisci quanti Post vuoi salvare (noo speficare se li vuoi tutti): ")
+        num = input("Inserisci quanti Post vuoi salvare (non speficare se li vuoi tutti): ")
         if num:
             L.download_saved_posts(max_count=int(num))
         else:
@@ -155,14 +179,15 @@ class Instagram:
                 [green]4[/green]- SCARICA LE STORIE ATTUALI DI UN '[green]{self.target}[/green]'
                 [green]5[/green]- SCARICA IGTV DI '[green]{self.target}[/green]'
                 [green]6[/green]- SCARICA TUTTI I POST DI UN '[green]{self.target}[/green]' (COMPRESI VIDEO)
-                [green]7[/green]- SCARICA TUTTI I TUOI POST SALVATI
+                [green]7[/green]- SCARICA I TUOI POST SALVATI
+
+                [bold red]PER USCIRE CTRL+C[/bold red]
                     """,
                     style="bold white on dark_blue", 
                     justify="center")
             scelta = input()
         except KeyboardInterrupt:
             console.print("\nexiting...", style="italic red")
-            input()
             sys.exit()
         except:
             console.print("Errore nell'inserimento dati!", style="italic red")
@@ -170,7 +195,7 @@ class Instagram:
         else:
             if scelta == "0":
                 self.target_data() 
-            if scelta == "1":
+            elif scelta == "1":
                 self.get_profile_info() 
             elif scelta == "2":
                 self.get_similar_profile()
@@ -183,8 +208,7 @@ class Instagram:
             elif scelta == "6":
                 self.get_posts()
             elif scelta == "7":
-                self.get_saved_posts()
-                
+                self.get_saved_posts()               
             else:
                 print("Scelta non valida!")
                 input()
