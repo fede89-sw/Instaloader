@@ -71,13 +71,7 @@ class Instagram:
 
     def get_profile_picture(self):
         """ Scarico Foto Profilo """
-        try:
-            L.download_profilepic(profile=self.profilo)
-        except:
-            console.print("Errore nel Download della Foto Profilo!", style="italic red")
-        else:
-            console.print("Foto Profilo Scaricata!", style="bold blue")
-
+        L.download_profilepic(profile=self.profilo)
 
 
     def get_profile_info(self):
@@ -116,15 +110,19 @@ class Instagram:
             except QueryReturnedNotFoundException as e:
                 console.print(f"Errore! Utente non trovato...{e}", style="italic red")
                 input()
+                sys.exit()
             except ConnectionException as e:
                 console.print(f"Errore! Connessione non riuscita...{e}", style="italic red")
                 input()
+                sys.exit()
             except ProfileNotExistsException as e:
                 console.print(f"Errore! Il Profilo '{self.target}' non esiste ...{e}", style="italic red")
                 input()
+                sys.exit()
             except:
                 console.print("Errore nell'inserimento dati!", style="italic red")
                 input()
+                sys.exit()
             else:
                 console.print(f"Target Acquisito: [bold blue]{self.target}[/bold blue]")
                 input()
