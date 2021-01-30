@@ -128,6 +128,14 @@ class Instagram:
                 input()
                 self.start()
 
+    @staticmethod
+    def get_saved_posts():
+        num = input("Inserisci quanti Post vuoi salvare (noo speficare se li vuoi tutti): ")
+        if num:
+            L.download_saved_posts(max_count=int(num))
+        else:
+            L.download_saved_posts()  
+        
 
     def start(self):
         try:
@@ -146,7 +154,8 @@ class Instagram:
                 [green]3[/green]- SCARICA FOTO PROFILO DI '[green]{self.target}[/green]'
                 [green]4[/green]- SCARICA LE STORIE ATTUALI DI UN '[green]{self.target}[/green]'
                 [green]5[/green]- SCARICA IGTV DI '[green]{self.target}[/green]'
-                [green]6[/green]- SCARICA TUTTI I POST DI UN '[green]{self.target}[/green]' (COMPRESI IGTV E VIDEO)
+                [green]6[/green]- SCARICA TUTTI I POST DI UN '[green]{self.target}[/green]' (COMPRESI VIDEO)
+                [green]7[/green]- SCARICA TUTTI I TUOI POST SALVATI
                     """,
                     style="bold white on dark_blue", 
                     justify="center")
@@ -173,6 +182,9 @@ class Instagram:
                 self.download_igtv()
             elif scelta == "6":
                 self.get_posts()
+            elif scelta == "7":
+                self.get_saved_posts()
+                
             else:
                 print("Scelta non valida!")
                 input()
@@ -186,3 +198,4 @@ if __name__ == "__main__":
         except KeyboardInterrupt:
             console.print("\nexiting...", style="italic red")
             break
+        
